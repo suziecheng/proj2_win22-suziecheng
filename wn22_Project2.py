@@ -17,9 +17,26 @@ def get_titles_from_search_results():
 
     [('Book title 1', 'Author 1','Ratings 1',), ('Book title 2', 'Author 2', 'Ratings 2')...]
     """
-    pass
+
+    with open("search_results.html", "r") as file:
+        
+        # create the soup ~
+        contents = file.read()
+        soup = BeautifulSoup(contents, "lxml")
+
+        # find title, author, and ratings
+        titles = soup.find_all("a", class_="bookTitle")
+        authors = soup.find_all("a", class_="authorName")
+        
+        # ratings = soup.find_all("span", class_="minirating")
+        # new = (title.text)[18:-8]
+        # print(int(new.replace(",", "")))
+
+        # for i in range(0, len(titles)):
+            # print(titles[i].text + authors[i].text)
 
 
+# only needs to return tuple of website names -------------------------------------------------------------------------------------->
 def get_links():
     """
     Write a function that creates a BeautifulSoup object after retrieving content from
@@ -34,7 +51,17 @@ def get_links():
 
     """
 
-    pass
+    # create beautifulsoup object ~
+    url = "https://www.goodreads.com/search?q=david+sedaris&qid="
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, "html.parser")
+
+    # return the first five urls
+    for link in soup.find_all('a', class_="bookTitle")[:5]:
+        href = link.get('href')
+        current_url = "https://www.goodreads.com"
+        absolute_url = current_url + href
+        print (absolute_url)
 
 
 def get_book_summary(book_html):
@@ -114,8 +141,12 @@ class TestCases(unittest.TestCase):
 
     def test_get_titles_from_search_results(self):
         # call get_titles_from_search_results() and save to a local variable
+        search_titles = get_titles_from_search_results()
 
         # check that the number of titles extracted is correct (20 titles)
+        total_titles = 20
+        message = "the titles are not equal"
+        # self.assertEqual(search_titles, total_titles)
 
         # check that the variable you saved after calling the function is a list
 
@@ -125,6 +156,7 @@ class TestCases(unittest.TestCase):
 
         # check that the last title is correct (open search_results.html and find it)
         pass
+    
     def test_get_links(self):
         # check that TestCases.search_urls is a list
 
@@ -163,6 +195,7 @@ class TestCases(unittest.TestCase):
 
         # check that the third book as a reviw count of 539
         pass
+    
     def test_summarize_best_books(self):
         # call summarize_best_books on best_books_2021.html and save it to a variable
 
@@ -177,6 +210,7 @@ class TestCases(unittest.TestCase):
         # check that the last tuple is made up of the following 3 strings: 'Middle Grade & Children's', 'Daughter of the Deep', 'https://www.goodreads.com/choiceawards/best-childrens-books-2021'
 
         pass
+    
     def test_write_csv(self):
         # call get_titles_from_search_results on search_results.htm and save the result to a variable
 
