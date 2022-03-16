@@ -16,25 +16,37 @@ def get_titles_from_search_results():
 
     [('Book title 1', 'Author 1','Ratings 1',), ('Book title 2', 'Author 2', 'Ratings 2')...]
     """
-
+    
     # create the soup ~
     with open("search_results.html", "r") as file:
         contents = file.read()
         soup = BeautifulSoup(contents, "lxml")
 
-    # find title, author, and ratings
+    # find title
     titles = soup.find_all("a", class_="bookTitle")
-    authors = soup.find_all("a", class_="authorName")
-    
-    # ratings = soup.find_all("span", class_="minirating")
-    # new = (title.text)[18:-8]
-    # print(int(new.replace(",", "")))
 
-    # for i in range(0, len(titles)):
-        # print(titles[i].text + authors[i].text)
+    # find author
+    authors = []
+    miniauthors = soup.find_all("span", itemprop="author")
+    for author in miniauthors:
+        other = author.find("a", class_="authorName")
+        authors.append(other)
+
+    # find ratings
+    ratings  = []
+    miniratings = soup.find_all("span", class_="minirating")
+    for rate in miniratings:
+        new = (rate.text)[18:-8]
+        ratings.append(int(new.replace(",", "")))
+
+    # create tuple
+    output = []
+    for i in range(len(titles)):
+        output.append((titles[i].text.strip(), authors[i].text, ratings[i]))
+
+    return output
 
 
-# only needs to return tuple of website names -------------------------------------------------------------------------------------->
 def get_links():
     """
     Write a function that creates a BeautifulSoup object after retrieving content from
@@ -54,15 +66,18 @@ def get_links():
     response = requests.get(url)
     soup = BeautifulSoup(response.text, "html.parser")
 
-    # return the first five urls
-    for link in soup.find_all('a', class_="bookTitle")[:5]:
+    # return the first five urls and create tuple
+    links = []
+    minilinks = soup.find_all('a', class_="bookTitle")[:5]
+    for link in minilinks:
         href = link.get('href')
         current_url = "https://www.goodreads.com"
         absolute_url = current_url + href
-        print (absolute_url)
+        links.append(absolute_url)
+    
+    return links
 
 
-# only needs to return tuple of book information ---------------------------------------------------------------------------------->
 def get_book_summary(book_html):
     """
     Write a function that creates a BeautifulSoup object that extracts book
@@ -90,8 +105,12 @@ def get_book_summary(book_html):
     book_rating = soup.find("span", itemprop="ratingValue")
     review_count = soup.find(itemprop="ratingCount").get("content")
 
+    # create tuple
+    output = [book_title.text.strip(), book_author.text, num_pages.text, book_rating.text.strip(), review_count]
+    
+    return output
 
-# only needs to return tuple of best books of 2021 ---------------------------------------------------------------------------------->
+
 def summarize_best_books(filepath):
     """
     Write a function to get a list of categories, book title and URLs from the "BEST BOOKS OF 2021"
@@ -112,24 +131,34 @@ def summarize_best_books(filepath):
         contents = file.read()
         soup = BeautifulSoup(contents, "lxml")
 
-    # get category, book title, and URL
     # category section
-    category = soup.find_all("h4", class_="category__copy")
-    for i in range(0, len(category)):
-        print(category[i].text)
+    category = []
+    minicategory = soup.find_all("h4", class_="category__copy")
+    for i in range(0, len(minicategory)):
+        category.append(minicategory[i].text)
 
     # book titles section
+    book = []
     for title in soup.find_all("img", class_="category__winnerImage"):
         book_title = title.get("alt")
-        print(book_title)
+        book.append(book_title)
 
     # url section
+    url = []
     test = soup.find_all('div', class_="category clearFix")
     for link in test:
         href = link.find("a")["href"]
         current_url = "https://www.goodreads.com"
         absolute_url = current_url + href
-        print(absolute_url)
+        url.append(absolute_url)
+
+    # create tuple
+    output = []
+    for i in range(len(category)):
+        output.append((category[i].strip(), book[i], url[i]))
+
+    return output
+
 
 
 # DO LATER ------------------------------------------------------------------------------------------------------------------------->
