@@ -13,27 +13,25 @@ def get_titles_from_search_results():
     through the object and return a list of tuples containing book titles, authors, and ratings 
     (ratings is the number of ratings, not the average rating) in the format given below. Make sure to strip()
     any newlines cast ratings to an int so we can sort on it later.
-.
 
     [('Book title 1', 'Author 1','Ratings 1',), ('Book title 2', 'Author 2', 'Ratings 2')...]
     """
 
+    # create the soup ~
     with open("search_results.html", "r") as file:
-        
-        # create the soup ~
         contents = file.read()
         soup = BeautifulSoup(contents, "lxml")
 
-        # find title, author, and ratings
-        titles = soup.find_all("a", class_="bookTitle")
-        authors = soup.find_all("a", class_="authorName")
-        
-        # ratings = soup.find_all("span", class_="minirating")
-        # new = (title.text)[18:-8]
-        # print(int(new.replace(",", "")))
+    # find title, author, and ratings
+    titles = soup.find_all("a", class_="bookTitle")
+    authors = soup.find_all("a", class_="authorName")
+    
+    # ratings = soup.find_all("span", class_="minirating")
+    # new = (title.text)[18:-8]
+    # print(int(new.replace(",", "")))
 
-        # for i in range(0, len(titles)):
-            # print(titles[i].text + authors[i].text)
+    # for i in range(0, len(titles)):
+        # print(titles[i].text + authors[i].text)
 
 
 # only needs to return tuple of website names -------------------------------------------------------------------------------------->
@@ -64,6 +62,7 @@ def get_links():
         print (absolute_url)
 
 
+# only needs to return tuple of book information ---------------------------------------------------------------------------------->
 def get_book_summary(book_html):
     """
     Write a function that creates a BeautifulSoup object that extracts book
@@ -78,10 +77,21 @@ def get_book_summary(book_html):
     You can easily capture CSS selectors with your browser's inspector window.
     Make sure to strip() any newlines from the book title, number of pages, and rating.
     """
+    
+    # create the soup ~
+    with open(book_html, "r") as file:
+        contents = file.read()
+        soup = BeautifulSoup(contents, "lxml")
+    
+    # get title, author, pages, rating, and review count
+    book_title = soup.find("h1", id="bookTitle")
+    book_author = soup.find("a", class_="authorName")
+    num_pages = soup.find("span", itemprop="numberOfPages")
+    book_rating = soup.find("span", itemprop="ratingValue")
+    review_count = soup.find(itemprop="ratingCount").get("content")
 
-    pass
 
-
+# only needs to return tuple of best books of 2021 ---------------------------------------------------------------------------------->
 def summarize_best_books(filepath):
     """
     Write a function to get a list of categories, book title and URLs from the "BEST BOOKS OF 2021"
@@ -96,9 +106,33 @@ def summarize_best_books(filepath):
     Don't forget to be append the full path to the URL so that the url is in the format 
     “https://www.goodreads.com/choiceawards/best-fiction-books-2021". rather than "/choiceawards/best-fiction-books-2021"
     """
-    pass
+
+    # create the soup ~
+    with open(filepath, "r") as file:
+        contents = file.read()
+        soup = BeautifulSoup(contents, "lxml")
+
+    # get category, book title, and URL
+    # category section
+    category = soup.find_all("h4", class_="category__copy")
+    for i in range(0, len(category)):
+        print(category[i].text)
+
+    # book titles section
+    for title in soup.find_all("img", class_="category__winnerImage"):
+        book_title = title.get("alt")
+        print(book_title)
+
+    # url section
+    test = soup.find_all('div', class_="category clearFix")
+    for link in test:
+        href = link.find("a")["href"]
+        current_url = "https://www.goodreads.com"
+        absolute_url = current_url + href
+        print(absolute_url)
 
 
+# DO LATER ------------------------------------------------------------------------------------------------------------------------->
 def write_csv(data, filename):
     """
     Write a function that takes in a list of tuples (called data, i.e. the
@@ -134,6 +168,7 @@ def extra_credit(filepath):
     You do not have to write test cases for this function.
     """
     pass
+
 
 class TestCases(unittest.TestCase):
 
